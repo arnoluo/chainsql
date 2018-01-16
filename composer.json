@@ -1,0 +1,25 @@
+{
+    "name": "ween/chainsql",
+    "description": "SQL editor, writing sql in php way.",
+    "license": "MIT",
+    "homepage": "https://github.com/arnoluo/chainsql",
+    "keywords": [
+        "mysql",
+        "php"
+    ],
+    "authors": [
+        {
+            "name": "Arno Luo",
+            "email": "arnoluo@163.com",
+            "homepage": "http://weens.org"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "ChainSql\\": "./"
+        }
+    }
+}
