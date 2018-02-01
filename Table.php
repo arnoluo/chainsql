@@ -10,6 +10,7 @@ class Table {
     public static $columnPos = -1;
     public static $object = null;
     public static $error = '';
+    public static $skip = false;
     public static $config = [
         'prefix' => '',
         'engine' => '',
@@ -47,9 +48,23 @@ class Table {
         self::$config['filename'] = trim($str);
     }
 
+    public static function skip()
+    {
+        self::$skip = true;
+    }
+
+    public static function endSkip()
+    {
+        self::$skip = false;
+    }
+
     public static function create($tableName, $callback)
     {
-        $table = self::instance('create');
+        $table = self::instance();
+
+        if (self::$skip) {
+            return $table;
+        }
 
         if (!self::resolveTableName($tableName, 'create')) {
             return;
@@ -63,7 +78,11 @@ class Table {
 
     public static function alter($tableName, $callback)
     {
-        $table = self::instance('alter');
+        $table = self::instance();
+
+        if (self::$skip) {
+            return $table;
+        }
 
         if (!self::resolveTableName($tableName, 'alter')) {
             return;
@@ -77,7 +96,11 @@ class Table {
 
     public static function drop($tableName)
     {
-        $table = self::instance('drop');
+        $table = self::instance();
+
+        if (self::$skip) {
+            return $table;
+        }
 
         if (!self::resolveTableName($tableName, 'drop')) {
             return;
@@ -88,13 +111,15 @@ class Table {
 
     public function tableComment($str)
     {
-        self::setTableValue('comment', (string)$str);
+        if (!self::$skip) {
+            self::setTableValue('comment', (string)$str);
+        }
     }
 
     public function __call($method, $params)
     {
         if (in_array($method, self::allowedType())) {
-            self::createColumn($params[0], $method, $params[1]);
+            self::createColumn($params[0], $method, isset($params[1]) ? $params[1] : '');
             return self::instance($method);
         }
 
@@ -114,6 +139,7 @@ class Table {
     public function uniqueKey()
     {
         self::addColumnParam('UNIQUE');
+        return self::instance();
     }
 
     public function add()
@@ -124,22 +150,26 @@ class Table {
     public function primaryKey()
     {
         self::addColumnParam('PRIMARY KEY');
+        return self::instance();
     }
 
     public function default($default)
     {
         self::addColumnParam("DEFAULT $default");
+        return self::instance();
     }
 
     public function autoIncrement($offset = 0)
     {
         $offset = $offset > 0 ? ' ' . (int)$offset : '';
         self::addColumnParam("AUTO_INCREMENT" . $offset);
+        return self::instance();
     }
 
     public function unsigned()
     {
         self::addColumnParam("UNSIGNED");
+        return self::instance();
     }
 
     public function __destruct()
@@ -225,7 +255,10 @@ class Table {
     {
         self::$columnPos++;
         self::$columns[self::$columnPos] = '';
-        $type .= '(' . $added . ')';
+        if (!empty($added)) {
+            $type .= '(' . $added . ')';
+        }
+
         self::addColumnParam("`$column`");
         self::addColumnParam(strtolower($type));
     }
@@ -263,7 +296,7 @@ class Table {
         $tableName = '`' . self::$config['prefix'] . $table['table'] . '`';
 
         if ($table['action'] === 'drop') {
-            return $sql . strtoupper($table['action']) . ' TABLE ' . $tableName . ";\n";
+            return $sql . strtoupper($table['action']) . ' TABLE ' . $tableName . ";\n\n";
         }
 
         $sql .= strtoupper($table['action']) . ' TABLE ' . $tableName;
@@ -306,6 +339,10 @@ class Table {
 
     protected static function painter($text)
     {
+        if (empty($text)) {
+            self::render("CHAIN SQL SUCCESS, NOTHING CHANGED\n");
+        }
+
         $fileName = self::$config['filename'];
         if (empty($fileName)) {
             self::render("<pre>$text</pre>");
@@ -329,7 +366,7 @@ class Table {
         return rename($fileName, $backupFile);
     }
 
-    protected static function instance($a)
+    protected static function instance()
     {
         if (is_null(self::$object)) {
             self::$object = new self();

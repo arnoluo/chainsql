@@ -1,6 +1,6 @@
 {
     "name": "ween/chainsql",
-    "description": "SQL editor, writing sql in php way.",
+    "description": "Sql editor, writing SQL sentence in php.",
     "license": "MIT",
     "homepage": "https://github.com/arnoluo/chainsql",
     "keywords": [
