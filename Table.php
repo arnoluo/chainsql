@@ -1,6 +1,6 @@
 <?php
 
-namespace ChainSql;
+namespace SqlChain;
 
 class Table {
     public static $columns = array();

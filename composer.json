@@ -1,8 +1,8 @@
 {
-    "name": "ween/chainsql",
+    "name": "ween/sqlchain",
     "description": "Sql editor, writing SQL sentence in php.",
     "license": "MIT",
-    "homepage": "https://github.com/arnoluo/chainsql",
+    "homepage": "https://github.com/arnoluo/sqlchain",
     "keywords": [
         "mysql",
         "php"
@@ -19,7 +19,7 @@
     },
     "autoload": {
         "psr-4": {
-            "ChainSql\\": "./"
+            "SqlChain\\": "./"
         }
     }
 }
